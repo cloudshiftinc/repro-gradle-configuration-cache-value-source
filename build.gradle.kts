@@ -30,16 +30,16 @@ group = "cloudshift.repro"
 
    Visualized with debug output:
 
-        beforeValueObtained()  // input tracking turned off
-        beforeValueObtained()  // input tracking turned off
-        afterValueObtained()   // input tracking turned on
+        beforeValueObtained()  // input tracking turned off (entering custom MyValueSource)
+        beforeValueObtained()  // input tracking turned off (entering environment variable)
+        afterValueObtained()   // input tracking turned on  (exiting environment variable)
         valueObtained(): class org.gradle.api.internal.provider.sources.EnvironmentVariableValueSource org.gradle.api.internal.provider.sources.EnvironmentVariableValueSource$Inject@46d4f344
 
         // whoops; inside our ValueSource with input tracking turned on
         In value source
         Test file @ /Users/chrislee/.cloudshift/test.properties
 
-        afterValueObtained()   // input tracking turned on
+        afterValueObtained()   // input tracking turned on (exiting custom MyValueSource)
         valueObtained(): class Build_gradle$MyValueSource Build_gradle$MyValueSource$Inject@6383cdd1
 
    Relevant code is below.
