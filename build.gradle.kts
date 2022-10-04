@@ -1,4 +1,6 @@
 import java.util.*
+import org.gradle.api.internal.provider.ValueSourceProviderFactory.ComputationListener
+import org.gradle.api.internal.provider.ValueSourceProviderFactory.ValueListener
 
 plugins {
     `java-library`
@@ -29,6 +31,10 @@ group = "cloudshift.repro"
    Relevant code is below.
 
  */
+
+// capture beforeValueObtained(), afterValueObtained() and valueObtained() events
+val controller = objects.newInstance(MyController::class)
+controller.listenerManager.addListener(MyListener())
 
 // this provider is implemented as a ValueSource
 val ciBuildStatusProvider = providers.environmentVariable("CI").map { true }.orElse(false)
@@ -81,4 +87,33 @@ abstract class MyValueSource : ValueSource<String, MyValueSource.MyValueSourcePa
 
         return ""
     }
+}
+
+
+abstract class MyController {
+    @get:Inject
+    abstract val services : BuildServiceRegistry
+
+    @get:Inject
+    abstract val listenerManager : org.gradle.internal.event.ListenerManager
+
+}
+class MyListener : ValueListener,
+    ComputationListener {
+    private val logger = Logging.getLogger(MyListener::class.java)
+    override fun <T : Any?, P : ValueSourceParameters?> valueObtained(
+        obtainedValue: ValueListener.ObtainedValue<T, P>,
+        source: ValueSource<T, P>
+    ) {
+        logger.lifecycle("valueObtained(): ${obtainedValue.valueSourceType} ${source}")
+    }
+
+    override fun beforeValueObtained() {
+        logger.lifecycle("beforeValueObtained()")
+    }
+
+    override fun afterValueObtained() {
+        logger.lifecycle("afterValueObtained()")
+    }
+
 }
